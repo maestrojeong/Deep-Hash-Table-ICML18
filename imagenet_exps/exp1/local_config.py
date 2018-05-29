@@ -27,55 +27,6 @@ DECAY_PARAMS_DICT =\
                 'b3' : {'initial_lr' : 1e-3, 'decay_steps' : 60000, 'decay_rate' : 0.3},
                 'b4' : {'initial_lr' : 3e-3, 'decay_steps' : 60000, 'decay_rate' : 0.3},
                 'b5' : {'initial_lr' : 1e-2, 'decay_steps' : 60000, 'decay_rate' : 0.3}
-
-                },
-            128 : {
-                'a1': {'initial_lr' : 1e-5, 'decay_steps' : 100000, 'decay_rate' : 0.3},
-                'a2' : {'initial_lr' : 3e-4, 'decay_steps' : 100000, 'decay_rate' : 0.3},
-                'a3' : {'initial_lr' : 1e-3, 'decay_steps' : 100000, 'decay_rate' : 0.3},
-                'a4' : {'initial_lr' : 3e-3, 'decay_steps' : 100000, 'decay_rate' : 0.3},
-                'a5' : {'initial_lr' : 1e-2, 'decay_steps' : 100000, 'decay_rate' : 0.3},
-                'b1': {'initial_lr' : 1e-5, 'decay_steps' : 120000, 'decay_rate' : 0.3},
-                'b2' : {'initial_lr' : 3e-4, 'decay_steps' : 120000, 'decay_rate' : 0.3},
-                'b3' : {'initial_lr' : 1e-3, 'decay_steps' : 120000, 'decay_rate' : 0.3},
-                'b4' : {'initial_lr' : 3e-3, 'decay_steps' : 120000, 'decay_rate' : 0.3},
-                'b5' : {'initial_lr' : 1e-2, 'decay_steps' : 120000, 'decay_rate' : 0.3}
-                },
-            64 : {
-                'a1': {'initial_lr' : 1e-5, 'decay_steps' : 200000, 'decay_rate' : 0.3},
-                'a2' : {'initial_lr' : 3e-4, 'decay_steps' : 200000, 'decay_rate' : 0.3},
-                'a3' : {'initial_lr' : 1e-3, 'decay_steps' : 200000, 'decay_rate' : 0.3},
-                'a4' : {'initial_lr' : 3e-3, 'decay_steps' : 200000, 'decay_rate' : 0.3},
-                'a5' : {'initial_lr' : 1e-2, 'decay_steps' : 200000, 'decay_rate' : 0.3},
-                'b1': {'initial_lr' : 1e-5, 'decay_steps' : 240000, 'decay_rate' : 0.3},
-                'b2' : {'initial_lr' : 3e-4, 'decay_steps' : 240000, 'decay_rate' : 0.3},
-                'b3' : {'initial_lr' : 1e-3, 'decay_steps' : 240000, 'decay_rate' : 0.3},
-                'b4' : {'initial_lr' : 3e-3, 'decay_steps' : 240000, 'decay_rate' : 0.3},
-                'b5' : {'initial_lr' : 1e-2, 'decay_steps' : 240000, 'decay_rate' : 0.3}
-                },
-             32 : {
-                'a1': {'initial_lr' : 1e-5, 'decay_steps' : 400000, 'decay_rate' : 0.3},
-                'a2' : {'initial_lr' : 3e-4, 'decay_steps' : 400000, 'decay_rate' : 0.3},
-                'a3' : {'initial_lr' : 1e-3, 'decay_steps' : 400000, 'decay_rate' : 0.3},
-                'a4' : {'initial_lr' : 3e-3, 'decay_steps' : 400000, 'decay_rate' : 0.3},
-                'a5' : {'initial_lr' : 1e-2, 'decay_steps' : 400000, 'decay_rate' : 0.3},
-                'b1': {'initial_lr' : 1e-5, 'decay_steps' : 480000, 'decay_rate' : 0.3},
-                'b2' : {'initial_lr' : 3e-4, 'decay_steps' : 480000, 'decay_rate' : 0.3},
-                'b3' : {'initial_lr' : 1e-3, 'decay_steps' : 480000, 'decay_rate' : 0.3},
-                'b4' : {'initial_lr' : 3e-3, 'decay_steps' : 480000, 'decay_rate' : 0.3},
-                'b5' : {'initial_lr' : 1e-2, 'decay_steps' : 480000, 'decay_rate' : 0.3}
-                },
-             16 : {
-                'a1': {'initial_lr' : 1e-5, 'decay_steps' : 800000, 'decay_rate' : 0.3},
-                'a2' : {'initial_lr' : 3e-4, 'decay_steps' : 800000, 'decay_rate' : 0.3},
-                'a3' : {'initial_lr' : 1e-3, 'decay_steps' : 800000, 'decay_rate' : 0.3},
-                'a4' : {'initial_lr' : 3e-3, 'decay_steps' : 800000, 'decay_rate' : 0.3},
-                'a5' : {'initial_lr' : 1e-2, 'decay_steps' : 800000, 'decay_rate' : 0.3},
-                'b1': {'initial_lr' : 1e-5, 'decay_steps' : 960000, 'decay_rate' : 0.3},
-                'b2' : {'initial_lr' : 3e-4, 'decay_steps' : 960000, 'decay_rate' : 0.3},
-                'b3' : {'initial_lr' : 1e-3, 'decay_steps' : 960000, 'decay_rate' : 0.3},
-                'b4' : {'initial_lr' : 3e-3, 'decay_steps' : 960000, 'decay_rate' : 0.3},
-                'b5' : {'initial_lr' : 1e-2, 'decay_steps' : 960000, 'decay_rate' : 0.3}
                 }
         },
    'piecewise' :
@@ -104,44 +55,8 @@ DECAY_PARAMS_DICT =\
                 'b4' : {'boundaries' : [40000, 70000], 'values' : [3e-3, 1e-3, 3e-4]},
                 'b5' : {'boundaries' : [40000, 70000], 'values' : [1e-2, 3e-3, 1e-3]}
                  },
-            256 : {
-                'a1' : {'boundaries' : [30000, 60000], 'values' : [1e-4, 3e-5, 1e-5]},
-                'a2' : {'boundaries' : [30000, 60000], 'values' : [3e-4, 1e-4, 3e-5]},
-                'a3' : {'boundaries' : [30000, 60000], 'values' : [1e-3, 3e-4, 1e-4]},
-                'a4' : {'boundaries' : [30000, 60000], 'values' : [3e-3, 1e-3, 3e-4]},
-                'a5' : {'boundaries' : [30000, 60000], 'values' : [1e-2, 3e-3, 1e-3]},
-                'b1' : {'boundaries' : [80000, 140000], 'values' : [1e-4, 3e-5, 1e-5]},
-                'b2' : {'boundaries' : [80000, 140000], 'values' : [3e-4, 1e-4, 3e-5]},
-                'b3' : {'boundaries' : [80000, 140000], 'values' : [1e-3, 3e-4, 1e-4]},
-                'b4' : {'boundaries' : [80000, 140000], 'values' : [3e-3, 1e-3, 3e-4]},
-                'b5' : {'boundaries' : [80000, 140000], 'values' : [1e-2, 3e-3, 1e-3]}
-                 },
-            128 : {
-                'a1' : {'boundaries' : [60000, 120000], 'values' : [1e-4, 3e-5, 1e-5]},
-                'a2' : {'boundaries' : [60000, 120000], 'values' : [3e-4, 1e-4, 3e-5]},
-                'a3' : {'boundaries' : [60000, 120000], 'values' : [1e-3, 3e-4, 1e-4]},
-                'a4' : {'boundaries' : [60000, 120000], 'values' : [3e-3, 1e-3, 3e-4]},
-                'a5' : {'boundaries' : [60000, 120000], 'values' : [1e-2, 3e-3, 1e-3]}
-                 },
-            64 : {
-                'a1' : {'boundaries' : [120000, 240000], 'values' : [1e-4, 3e-5, 1e-5]},
-                'a2' : {'boundaries' : [120000, 240000], 'values' : [3e-4, 1e-4, 3e-5]},
-                'a3' : {'boundaries' : [120000, 240000], 'values' : [1e-3, 3e-4, 1e-4]},
-                'a4' : {'boundaries' : [120000, 240000], 'values' : [3e-3, 1e-3, 3e-4]},
-                'a5' : {'boundaries' : [120000, 240000], 'values' : [1e-2, 3e-3, 1e-3]}
-                 },
-            32 : {
-                'a1' : {'boundaries' : [240000, 480000], 'values' : [1e-4, 3e-5, 1e-5]},
-                'a2' : {'boundaries' : [240000, 480000], 'values' : [3e-4, 1e-4, 3e-5]},
-                'a3' : {'boundaries' : [240000, 480000], 'values' : [1e-3, 3e-4, 1e-4]},
-                'a4' : {'boundaries' : [240000, 480000], 'values' : [3e-3, 1e-3, 3e-4]},
-                'a5' : {'boundaries' : [240000, 480000], 'values' : [1e-2, 3e-3, 1e-3]}
-                 }
         }
     }
-COLORS = 'bgrcmykw'
-MARKERS = 'o1s*+xD^v'
-
 ACTIVATE_K_SET = np.arange(1, 5)
 K_SET = [1,4,16]
 #===========================Local configuration==============================#

@@ -5,7 +5,7 @@ sys.path.append('../../tfops')
 
 # ../../utils
 from datasetmanager import DATASETMANAGER_DICT
-from format_op import params2id, listformat1, listformat2, numformat2
+from format_op import params2id, listformat
 from shutil_op import remove_file, remove_dir, copy_file, copy_dir
 from csv_op import CsvWriter2, CsvWriter, read_csv
 from writer import create_muldir, write_pkl
@@ -60,48 +60,42 @@ if __name__ == '__main__':
 
     FILE_ID = params2id(args.dataset, args.conv, args.ltype, args.m)
 
-    for activate_k_index in range(nactivate):
-        activate_k = ACTIVATE_K_SET[activate_k_index]
+    if args.hltype=='npair': args.nsclass = args.nbatch//2 
 
-        HASH_FILE_ID = FILE_ID+'_'+params2id(args.hltype, args.hdt, args.d, activate_k)
-        QUERY_FILE_ID = FILE_ID+'_'+params2id('*', '*', args.hltype, args.hdt, args.d, activate_k, '*', '*', '*', '*')
+    HASH_FILE_ID = params2id(FILE_ID, args.hltype, args.hdt, args.d, args.k)
+    QUERY_FILE_ID = params2id(FILE_ID, '*', '*', args.hltype, args.hdt, args.d, args.k, '*', '*', '*', '*')
 
-        print("file id : {}".format(HASH_FILE_ID))
-        print("query id : {}".format(QUERY_FILE_ID))
+    print("file id : {}".format(HASH_FILE_ID))
+    print("query id : {}".format(QUERY_FILE_ID))
 
-        HASH_PKL_DIR = RESULT_DIR+'hash/pkl/'
-        HASH_CSV_DIR = RESULT_DIR+'hash/csv/'
-        HASH_SAVE_DIR = RESULT_DIR+'hash/save/%s/'%HASH_FILE_ID
+    PKL_DIR = RESULT_DIR+'exp1/pkl/'
+    CSV_DIR = RESULT_DIR+'exp1/csv/'
+    SAVE_DIR = RESULT_DIR+'exp1/save/%s/'%HASH_FILE_ID
 
-        if os.path.exists(HASH_SAVE_DIR):
-            remove_dir(HASH_SAVE_DIR)
+    copy_dst_csv = CSV_DIR+HASH_FILE_ID+'.csv'
+    copy_dst_pkl = PKL_DIR+HASH_FILE_ID+'.pkl'
 
-        copy_dst_csv = HASH_CSV_DIR+HASH_FILE_ID+'.csv'
-        copy_dst_pkl = HASH_PKL_DIR+HASH_FILE_ID+'.pkl'
+    if os.path.exists(SAVE_DIR): remove_dir(SAVE_DIR)
+    if os.path.exists(copy_dst_csv): remove_file(copy_dst_csv)
+    if os.path.exists(copy_dst_pkl): remove_file(copy_dst_pkl)
 
-        if os.path.exists(copy_dst_csv): 
-            remove_file(copy_dst_csv)
-        if os.path.exists(copy_dst_pkl):
-            remove_file(copy_dst_pkl)
+    pkl_files = glob.glob(PKL_DIR+QUERY_FILE_ID+'.pkl')
+    print(pkl_files)
+    if len(pkl_files)==0:
+        print("No such pkl files")
+        sys.exit() 
 
-        pkl_files = glob.glob(HASH_PKL_DIR+QUERY_FILE_ID+'.pkl')
+    best_file_id = os.path.basename(pkl_files[0])[:-4] # -.pkl'
+    best_performance = np.sum(read_pkl(pkl_files[0])['te_te_precision_at_k'])
+    for pkl_idx in range(len(pkl_files)):
+        file_id = os.path.basename(pkl_files[pkl_idx])[:-4] # -.pkl'
+        performance = np.sum(read_pkl(pkl_files[pkl_idx])['te_te_precision_at_k'])
+        print("performance : {} from {}".format(performance, file_id))
+        if performance > best_performance:
+            best_performance, best_file_id = performance, file_id
+    print("best performance : {} from {}".format(best_performance, best_file_id))
 
-        if len(pkl_files)>0:
-            print(pkl_files)
+    copy_file(CSV_DIR+best_file_id+'.csv', copy_dst_csv)
+    copy_file(PKL_DIR+best_file_id+'.pkl', copy_dst_pkl)
+    copy_dir(RESULT_DIR+'exp1/save/'+best_file_id, SAVE_DIR)
 
-            best_file_id = os.path.basename(pkl_files[0])[:-4] # -.pkl'
-            content = read_pkl(pkl_files[0])
-            best_performance = np.sum(content['te_te_precision_at_k']) # bigger the better
-            for pkl_index in range(len(pkl_files)):
-                content = read_pkl(pkl_files[pkl_index])
-                performance = np.sum(content['te_te_precision_at_k']) # bigger the better
-                #performance = content['train_nmi'] # bigger the better
-                print("performance : {}".format(performance))
-                if best_performance<performance:
-                    best_performance = performance
-                    best_file_id = os.path.basename(pkl_files[pkl_index])[:-4] # -.pkl'
-            print("best performance : {} from {}".format(best_performance, best_file_id))
-             
-            copy_file(HASH_CSV_DIR+best_file_id+'.csv', copy_dst_csv)
-            copy_file(HASH_PKL_DIR+best_file_id+'.pkl', copy_dst_pkl)
-            copy_dir(RESULT_DIR+'hash/save/'+best_file_id, HASH_SAVE_DIR)

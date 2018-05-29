@@ -25,10 +25,6 @@ DECAY_PARAMS_DICT =\
                 }
         }
     }
-COLORS = 'bgrcmykw'
-MARKERS = 'o1s*+xD^v'
-
-ACTIVATE_K_SET = np.arange(1, 5)
 K_SET = [1,4,16]
 RESULT_DIR = EXP_PATH+"imagenet_exps/"
 #========================PARAM============================#

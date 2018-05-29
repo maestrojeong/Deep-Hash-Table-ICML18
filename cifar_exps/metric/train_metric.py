@@ -6,7 +6,7 @@ sys.path.append('../../tfops')
 # ../../utils
 from datasetmanager import DATASETMANAGER_DICT
 from format_op import params2id, listformat
-from csv_op import CsvWriter2, read_csv
+from csv_op import CsvWriter2
 from writer import create_muldir, write_pkl
 
 # ./

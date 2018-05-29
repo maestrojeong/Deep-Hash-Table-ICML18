@@ -6,7 +6,7 @@ sys.path.append('../../tfops')
 # ../../utils
 from datasetmanager import DATASETMANAGER_DICT
 from format_op import params2id, listformat
-from csv_op import CsvWriter2, CsvWriter
+from csv_op import CsvWriter2
 from writer import create_muldir, write_pkl
 
 # ./
@@ -74,12 +74,11 @@ if __name__ == '__main__':
     model.prepare_test()
     model.build_hash()
     model.set_up_train_hash()
-
     try: 
         model.restore_hash(save_dir=HASH_SAVE_DIR)
     except AttributeError:
         model.initialize()
-        model.train_hash(200, save_dir=HASH_SAVE_DIR, board_dir=BOARD_DIR)
+        model.train_hash(args.epoch, save_dir=HASH_SAVE_DIR, board_dir=BOARD_DIR)
         model.restore_hash(save_dir=HASH_SAVE_DIR)
 
     model.prepare_test_hash()

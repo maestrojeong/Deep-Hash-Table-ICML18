@@ -6,8 +6,7 @@ sys.path.append('../../tfops')
 # ../../utils
 from datasetmanager import DATASETMANAGER_DICT
 from format_op import params2id, listformat
-from shutil_op import remove_file, remove_dir, copy_file, copy_dir
-from csv_op import CsvWriter2, CsvWriter
+from csv_op import CsvWriter2
 from writer import create_muldir, write_pkl
 
 # ./
@@ -22,9 +21,6 @@ from deepmetric import DeepMetric
 
 import numpy as np
 import itertools
-import shutil
-import glob
-import os
 import argparse
 parser = argparse.ArgumentParser()
 
@@ -47,60 +43,59 @@ parser.add_argument("--hdptype", default = HASH_DECAY_PARAM_TYPE, help="hash dec
 
 args = parser.parse_args()
 
-nactivate = len(ACTIVATE_K_SET)
-
 if __name__ == '__main__':
-    args.m=args.d
-    args.ltype = args.hltype
+    args.ltype=args.hltype
+    args.m = args.d
 
     FILE_ID = params2id(args.dataset, args.conv, args.ltype, args.m)
 
-    if args.hltype=='npair': args.nsclass = args.nbatch//2
+    if args.hltype=='npair': args.nsclass = args.nbatch//2 
 
     HASH_METRIC_PARAM = args.hlamb if args.hltype=='npair' else args.hma
-    HASH_FILE_ID = params2id(FILE_ID, args.hltype, args.hdt, args.d, args.k)
-    HASH_FILE_ID_TEST = params2id(HASH_FILE_ID, 'test')
-    HASH_FILE_ID_TRAIN = params2id(HASH_FILE_ID, 'train')
-    QUERY_FILE_ID = params2id(FILE_ID, '*', '*', args.hltype, args.hdt, args.d, args.k, '*', '*', '*', '*', 'test')
+    HASH_FILE_ID = params2id(FILE_ID, args.nbatch, args.nsclass, args.hltype, args.hdt, args.d, args.k, HASH_METRIC_PARAM, args.plamb, args.hdtype, args.hdptype)
 
-    print("file id : {}\nquery id : {}".format(HASH_FILE_ID, QUERY_FILE_ID))
-
-    PKL_DIR = RESULT_DIR+'exp1/pkl/'
+    SAVE_DIR = RESULT_DIR+'metric/save/%s/'%FILE_ID
+    HASH_SAVE_DIR = RESULT_DIR+'exp1/save/%s/'%HASH_FILE_ID
+    LOG_DIR = RESULT_DIR+'exp1/log/'
     CSV_DIR = RESULT_DIR+'exp1/csv/'
-    SAVE_DIR = RESULT_DIR+'exp1/save/%s/'%HASH_FILE_ID
+    PKL_DIR = RESULT_DIR+'exp1/pkl/'
+    BOARD_DIR = RESULT_DIR+'exp1/board/%s/'%HASH_FILE_ID
 
-    copy_dst_csv_test = CSV_DIR+HASH_FILE_ID_TEST+'.csv'
-    copy_dst_pkl_test = PKL_DIR+HASH_FILE_ID_TEST+'.pkl'
-    
-    copy_dst_csv_train = CSV_DIR+HASH_FILE_ID_TRAIN+'.csv'
-    copy_dst_pkl_train = PKL_DIR+HASH_FILE_ID_TRAIN+'.pkl'
+    create_muldir(SAVE_DIR, LOG_DIR, CSV_DIR, PKL_DIR, HASH_SAVE_DIR, BOARD_DIR)
 
-    if os.path.exists(SAVE_DIR): remove_dir(SAVE_DIR)
-    if os.path.exists(copy_dst_csv_train): remove_file(copy_dst_csv_train)
-    if os.path.exists(copy_dst_csv_test): remove_file(copy_dst_csv_test)
+    # load data
+    datasetmanager = DATASETMANAGER_DICT[args.dataset]
+    dm_train, dm_val, dm_test = datasetmanager(args.hltype, nsclass=args.nsclass)
+    for v in [dm_train, dm_val, dm_test]: v.print_shape()
 
-    if os.path.exists(copy_dst_pkl_train): remove_file(copy_dst_pkl_train)
-    if os.path.exists(copy_dst_pkl_test): remove_file(copy_dst_pkl_test)
+    model = DeepMetric(dm_train, dm_val, dm_test, LOG_DIR+HASH_FILE_ID+'.log', args)
+    model.build()
+    model.restore(save_dir=SAVE_DIR)
+    model.prepare_test()
+    model.build_hash()
+    model.set_up_train_hash()
+    try: 
+        model.restore_hash(save_dir=HASH_SAVE_DIR)
+    except AttributeError:
+        model.initialize()
+        model.train_hash(args.epoch, save_dir=HASH_SAVE_DIR, board_dir=BOARD_DIR)
+        model.restore_hash(save_dir=HASH_SAVE_DIR)
+    model.prepare_test_hash()
+    performance_hash = model.test_hash_metric(args.k, K_SET)
+    model.delete()
+    del model
+    del dm_train
+    del dm_val
+    del dm_test
 
-    pkl_files = glob.glob(PKL_DIR+QUERY_FILE_ID+'.pkl')
-    print(pkl_files)
-    if len(pkl_files)==0:
-        print("No such pkl files")
-        sys.exit() 
-
-    best_file_id = os.path.basename(pkl_files[0])[:-9] # -_test.pkl'
-    best_performance = np.sum(read_pkl(pkl_files[0])['te_te_precision_at_k'])
-    for pkl_idx in range(len(pkl_files)):
-        file_id = os.path.basename(pkl_files[pkl_idx])[:-9] # -_test.pkl'
-        performance = np.sum(read_pkl(pkl_files[pkl_idx])['te_te_precision_at_k'])
-        print("performance : {} from {}".format(performance, file_id))
-        if performance > best_performance:
-            best_performance, best_file_id = performance, file_id
-    print("best performance : {} from {}".format(best_performance, best_file_id))
-
-    copy_file(CSV_DIR+best_file_id+'_test.csv', copy_dst_csv_test)
-    copy_file(CSV_DIR+best_file_id+'_train.csv', copy_dst_csv_train)
-    copy_file(PKL_DIR+best_file_id+'_test.pkl', copy_dst_pkl_test)
-    copy_file(PKL_DIR+best_file_id+'_train.pkl', copy_dst_pkl_train)
-    copy_dir(RESULT_DIR+'exp1/save/'+best_file_id, SAVE_DIR)
-
+    write_pkl(performance_hash, path=PKL_DIR + HASH_FILE_ID+'.pkl')
+    cwrite = CsvWriter2(1) 
+    key_set = ['test_nmi', 'te_te_suf', 'te_te_precision_at_k', 'te_te_recall_at_k']
+    for key in key_set:
+        cwrite.add_header(0, str(key))
+        content = ''
+        if 'suf' in str(key): content = listformat(performance_hash[key])
+        elif 'at_k' in str(key): content = listformat(performance_hash[key])
+        else: content = performance_hash[key]
+        cwrite.add_content(0, content)
+    cwrite.write(CSV_DIR+HASH_FILE_ID+'.csv')

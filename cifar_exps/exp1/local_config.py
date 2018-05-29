@@ -1,3 +1,8 @@
+import sys
+sys.path.append("../../configs")
+#../../configs
+from path import EXP_PATH
+
 import numpy as np
 
 DECAY_PARAMS_DICT =\
@@ -24,14 +29,8 @@ DECAY_PARAMS_DICT =\
             'type5' : {'boundaries' : [10000, 100000, 100000], 'values' : [1e-6, 1e-1, 1e-2, 1e-3]},
         }
     }
-COLORS = 'bgrcmykw'
-MARKERS = 'o1s*+xD^v'
-
-ACTIVATE_K_SET = np.arange(1, 5)
 K_SET = [1,4,16]
-#===========================Local configuration==============================#
-RESULT_DIR = '../../../exp_results/exps/hash_metric9v3/'
-RESULT_DIR_READ = '../../../exp_results/exps/hash_metric1/'
+RESULT_DIR = EXP_PATH + 'imagenet_exps/'
 #========================PARAM============================#
 DATASET= 'cifar'
 GPU_ID = 0
