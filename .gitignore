@@ -1,0 +1,15 @@
+__pycache__
+.ipynb*
+
+save
+log
+csv
+board
+docs
+asset
+
+*.npy
+*.pkl
+*.log
+*.swp
+*.pyc
