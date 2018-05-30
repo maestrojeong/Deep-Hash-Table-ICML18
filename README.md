@@ -1,4 +1,4 @@
-# Efficient end-to-end learning for quantizable representations
+ # Efficient end-to-end learning for quantizable representations
 This repository has the source code for the paper "Efficient end-to-end learning for quantizable representations"(ICML18).
 
 ## Citing this work
@@ -56,12 +56,31 @@ python imagenet32_process.py
 ```
 
 ## Training Procedure
-1. Training metric
-2. Training hash codes
-
+* Cifar-100 experiment
+    ```
+    cd cifar_exps/
+    ```
+    1. Training metric
+    ```
+    cd cifar_exps/metric/
+    ```
+    *train_metric.py* is to train embedding with metric learning losses.
+    *test_metric.py* is to test the embedding with the hash codes built with vector quantization method(VQ) and thresholding method(Th).
+    2. Training hash codes
+    ```
+    cd cifar_exps/exp1/
+    ```
+    *train_hash.py* is to replace the last layer and fine tune the embedding with the proposed method in paper.
+    *test_hash.py* is to test the hash codes built with the embedding trained from *train_hash.py*.
+* ImageNet experiment\\
+    Identical to the Cifar-100 experiment
 ## Evaluation
+* Evaluation code is in *utils/evaluation.py*.
+* The hash table built with hash code is evaluated with 3 different metric(*NMI, precision@k, SUF*).
 
 ## Ortools
+* The code to solve the dicrete optimization problem in polynomial time is in *utils/ortools_op.py*
+* The time to solve the discrete optimization problem is calculated with the code *ortools_exp/*
 
 ## License 
 MIT License
