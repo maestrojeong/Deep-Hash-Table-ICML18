@@ -57,12 +57,12 @@ python imagenet32_process.py
 
 ## Training Procedure
 * Cifar-100 experiment(*cifar_exps/*) and ImageNet experiment(*imagenet_exps/*).
-1. Training metric(*metric/*)
-    *train_metric.py* is to train embedding with metric learning losses.
-    *test_metric.py* is to test the embedding with the hash codes built with vector quantization method(VQ) and thresholding method(Th).
+1. Training metric(*metric/*)\\
+    - *train_metric.py* is to train embedding with metric learning losses.
+    - *test_metric.py* is to test the embedding with the hash codes built with vector quantization method(VQ) and thresholding method(Th).
 2. Training hash codes(*exp1/*)
-    *train_hash.py* is to replace the last layer and fine tune the embedding with the proposed method in paper.
-    *test_hash.py* is to test the hash codes built with the embedding trained from *train_hash.py*.
+    - *train_hash.py* is to replace the last layer and fine tune the embedding with the proposed method in paper.
+    - *test_hash.py* is to test the hash codes built with the embedding trained from *train_hash.py*.
 ## Evaluation
 * Evaluation code is in *utils/evaluation.py*.
 * The hash table built with hash code is evaluated with 3 different metric(*NMI, precision@k, SUF*).
