@@ -34,9 +34,6 @@ import numpy as np
 import glob
 import os
 
-import logging
-logging.basicConfig(level=logging.DEBUG, format="[%(asctime)s] %(message)s", datefmt="%m%d %H:%M:%S" )
-
 class DeepMetric:
     def __init__(self, train_dataset, val_dataset, test_dataset, logfilepath, args):
         self.args = args
