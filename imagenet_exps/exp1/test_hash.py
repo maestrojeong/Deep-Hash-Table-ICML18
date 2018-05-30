@@ -11,16 +11,12 @@ from csv_op import CsvWriter2, CsvWriter, read_csv
 from writer import create_muldir, write_pkl
 from reader import read_pkl
 
-# ./
-from local_config import ACTIVATE_K_SET, K_SET,\
-                         DATASET, GPU_ID, BATCH_SIZE, NSCLASS, EPOCH,\
-                         CONV_NAME, EMBED_M, LOSS_TYPE,\
-                         BUCKET_D, ACTIVATE_K,\
-                         HASH_DECAY_TYPE, HASH_DECAY_PARAM_TYPE,\
+from local_config import K_SET, RESULT_DIR,\
+                         DATASET, GPU_ID, BATCH_SIZE, EPOCH, NSCLASS,\
+                         CONV_NAME, LOSS_TYPE, EMBED_M, BUCKET_D, ACTIVATE_K,\
                          HASH_LOSS_TYPE, HASH_DISTANCE_TYPE,\
-                         HASH_LAMBDA, HASH_MARGIN_ALPHA,\
-                         PAIRWISE_LAMBDA,\
-                         COLORS, RESULT_DIR, RESULT_DIR_READ
+                         PAIRWISE_LAMBDA, HASH_LAMBDA, HASH_MARGIN_ALPHA,\
+                         HASH_DECAY_TYPE, HASH_DECAY_PARAM_TYPE
 
 from deepmetric import DeepMetric
 

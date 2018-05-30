@@ -278,7 +278,7 @@ def get_recall_precision_at_k(dist_matrix, labelq, labelh, k_set, issame=False):
         precision_value_set.append(precision_correct_set[k_idx]/nquery/k)
     return recall_value_set, precision_value_set 
 
-def get_nmi_quick(index_array, label_array, ncluster, nlabel):
+def get_nmi_suf_quick(index_array, label_array, ncluster, nlabel):
     '''
     Args:
         index_array - [ndata, k]
@@ -289,7 +289,10 @@ def get_nmi_quick(index_array, label_array, ncluster, nlabel):
         nlabel - int
     Return:
         nmi - float
+        suf - float
     '''
+    if index_array.ndim==1:
+        index_array = np.expand_dims(index_array, axis=-1)
     ndata, k_value = index_array.shape
     hash_distribution = np.zeros([ncluster, nlabel])
     
@@ -298,8 +301,8 @@ def get_nmi_quick(index_array, label_array, ncluster, nlabel):
         for idx2 in range(k_value):
             hash_distribution[index_array[idx1][idx2]][tmp_l]+=1
 
-    cluster_array = np.sum(hash_distribution, axis=1)
-    label_array = np.sum(hash_distribution, axis=0)
+    cluster_array = np.sum(hash_distribution, axis=1) # [ncluster]
+    label_array = np.sum(hash_distribution, axis=0) # [nlabel]
 
     total_size = ndata*k_value
 
@@ -321,8 +324,9 @@ def get_nmi_quick(index_array, label_array, ncluster, nlabel):
             if hash_distribution[c_idx][l_idx]!=0:
                 mutual_information += hash_distribution[c_idx][l_idx]/total_size*np.log2(total_size*hash_distribution[c_idx][l_idx]/cluster_array[c_idx]/label_array[l_idx])
     norm_term = (cluster_entropy+label_entropy)/2
-    return mutual_information/norm_term
+    nmi = mutual_information/norm_term
 
-if __name__=='__main__':
-    a = np.array([[1,5,0],[4,1,1],[0,2,3]])
-    print(get_nmi(a)) # answer should be 0.36 
+    suf = np.sum(cluster_array)/np.sum(np.square(cluster_array))
+    suf *= ndata
+    suf /= k_value
+    return nmi, suf

@@ -6,23 +6,21 @@ sys.path.append('../../tfops')
 from info import CIFARNCLASS
 
 # ../../utils 
-from evaluation import evaluate_metric, evaluate_hash_te_tr
-from sklearn_op import KMeansClustering
+from evaluation import evaluate_hash_te_tr
 from ortools_op import SolveMaxMatching
-from lgger_op import LoggerManager
+from logger_op import LoggerManager
+from eval_op import get_nmi_suf_quick
 from gpu_op import selectGpuById
 from np_op import activate_k_2D
 
 # ../../tfops
 from ops import rest_initializer, vars_info_vl, get_multi_train_op, get_initialized_vars
 from nets import CONV_DICT
-from dist import npairs_loss, triplet_semihard_loss,\
-                 pairwise_distance_euclid, pairwise_distance_euclid_v2,\
-                 PAIRWISE_DISTANCE_HUNGARIAN_DICT, NPAIR_LOSS_HUNGARIAN_DICT
-
-from transform_op import apply_tf_op, pairwise_distance_euclid_efficient, get_recall_at_1_efficient
+from dist import pairwise_distance_euclid, pairwise_distance_euclid_v2
+from hash_dist import triplet_semihard_loss_hash, npairs_loss_hash,\
+                      PAIRWISE_DISTANCE_WITH_OBJECTIVE_DICT, PAIRWISE_SIMILARITY_WITH_OBJECTIVE_DICT
+from transform_op import apply_tf_op, pairwise_distance_euclid_efficient
 from summary_op import SummaryWriter
-
 from lr_op import DECAY_DICT
 
 # ./
@@ -78,8 +76,10 @@ class DeepMetric:
         self.logger.info("Setting val_dataset starts")
         self.val_dataset = val_dataset
         self.dataset_dict['val'] = self.val_dataset
-        self.dataset_dict['val2'] = self.val_dataset
+        self.val_image = self.dataset_dict['val'].image 
+        self.val_label = self.dataset_dict['val'].label
         self.nval = self.val_dataset.ndata
+        self.ncls_val = self.val_dataset.nclass
         self.nbatch_val = self.nval//self.args.nbatch
         self.logger.info("Setting val_dataset ends")
     
@@ -134,19 +134,20 @@ class DeepMetric:
 
         with slim.arg_scope([slim.fully_connected], activation_fn=None, weights_regularizer=slim.l2_regularizer(0.0005), biases_initializer=tf.zeros_initializer()):
             if self.args.hltype=='triplet':
-                self.embed_k_hash = self.last if self.args.hms == 'par' else self.embed
+                self.embed_k_hash = self.last
                 with tf.variable_scope('Hash', reuse=False): self.embed_k_hash = slim.fully_connected(self.embed_k_hash, self.args.d, scope="fc1")
                 self.embed_k_hash_l2_norm = tf.nn.l2_normalize(self.embed_k_hash, dim=-1) # embedding with l2 normalization
-                def pairwise_distance_d(embeddings):
-                    return PAIRWISE_DISTANCE_HUNGARIAN_DICT[self.args.hdt](embeddings, objective=self.objective)
-                self.loss_hash = triplet_semihard_loss(labels=self.label, embeddings=self.embed_k_hash_l2_norm, pairwise_distance=pairwise_distance_d, margin=self.args.hma)
-        else: 
-            self.anc_embed_k_hash = self.anc_last
-            self.pos_embed_k_hash = self.pos_last
-            with tf.variable_scope('Hash', reuse=False): self.anc_embed_k_hash = slim.fully_connected(self.anc_embed_k_hash, self.args.d, scope="fc1")
-            with tf.variable_scope('Hash', reuse=True): self.pos_embed_k_hash = slim.fully_connected(self.pos_embed_k_hash, self.args.d, scope="fc1")
-            npairs_loss_hash = NPAIR_LOSS_HUNGARIAN_DICT[self.args.hdt]
-            self.loss_hash = npairs_loss_hash(labels=self.label, embeddings_anchor=self.anc_embed_k_hash, embeddings_positive=self.pos_embed_k_hash, objective=self.objective, reg_lambda=self.args.hlamb)
+                self.pairwise_distance =PAIRWISE_DISTANCE_WITH_OBJECTIVE_DICT[self.args.hdt]
+                self.loss_hash = triplet_semihard_loss_hash(labels=self.label, embeddings=self.embed_k_hash_l2_norm, objectives=self.objective,\
+                                pairwise_distance=self.pairwise_distance, margin=self.args.hma)
+            else: 
+                self.anc_embed_k_hash = self.anc_last
+                self.pos_embed_k_hash = self.pos_last
+                with tf.variable_scope('Hash', reuse=False): self.anc_embed_k_hash = slim.fully_connected(self.anc_embed_k_hash, self.args.d, scope="fc1")
+                with tf.variable_scope('Hash', reuse=True): self.pos_embed_k_hash = slim.fully_connected(self.pos_embed_k_hash, self.args.d, scope="fc1")
+                self.similarity_func =PAIRWISE_SIMILARITY_WITH_OBJECTIVE_DICT[self.args.hdt]
+                self.loss_hash = npairs_loss_hash(labels=self.label, embeddings_anchor=self.anc_embed_k_hash, embeddings_positive=self.pos_embed_k_hash,\
+                        objective=self.objective, similarity_func=self.similarity_func, reg_lambda=self.args.hlamb)
 
         self.logger.info("Model building train hash ends")
 
@@ -188,6 +189,9 @@ class DeepMetric:
         self.generate_sess()
         rest_initializer(self.sess) 
         self.start_epoch = 0
+        val_p_dist = pairwise_distance_euclid_efficient(input1=self.val_embed, input2=self.val_embed, session=self.sess, batch_size=self.args.nbatch)
+        self.logger.info("Calculating pairwise distance of validation data")
+        self.val_arg_sort = np.argsort(val_p_dist, axis=1)
         self.logger.info("Model initialization ends")
 
     def save(self, global_step, save_dir):
@@ -212,7 +216,6 @@ class DeepMetric:
         saver = tf.train.Saver()
         latest_checkpoint = tf.train.latest_checkpoint(save_dir)
         self.logger.info("Restoring from {}".format(latest_checkpoint))
-        self.start_epoch = int(os.path.basename(latest_checkpoint)[len('model')+1:])
         self.generate_sess()
         saver.restore(self.sess, latest_checkpoint)
         self.logger.info("Restoring model done.")        
@@ -236,7 +239,7 @@ class DeepMetric:
         Return : 
             following graph operations
         '''
-        assert key in ['train', 'test', 'val'], "key should be train or val or val2 or test"
+        assert key in ['train', 'test', 'val'], "key should be train or val or test"
         if self.args.hltype=='npair':
             batch_anc_img, batch_pos_img, batch_anc_label, batch_pos_label = self.dataset_dict[key].next_batch(batch_size=self.args.nbatch)
  
@@ -351,11 +354,13 @@ class DeepMetric:
         self.logger.info("Model preparing test")
         if self.args.hltype=='npair':
             def custom_apply_tf_op(inputs, output_gate): return apply_tf_op(inputs=inputs, session=self.sess, input_gate=self.anc_img, output_gate=output_gate, batch_size=self.args.nbatch//2, dim=4, train_gate=self.istrain)
+            self.val_embed = custom_apply_tf_op(inputs=self.val_image, output_gate=self.anc_embed)
             self.test_embed = custom_apply_tf_op(inputs=self.test_image, output_gate=self.anc_embed)
             self.train_embed = custom_apply_tf_op(inputs=self.train_image, output_gate=self.anc_embed)
 
         else: # triplet
             def custom_apply_tf_op(inputs, output_gate): return apply_tf_op(inputs=inputs, session=self.sess, input_gate=self.img, output_gate=output_gate, batch_size=self.args.nbatch, dim=4, train_gate=self.istrain)
+            self.val_embed = custom_apply_tf_op(inputs=self.val_image, output_gate=self.embed)
             self.test_embed = custom_apply_tf_op(inputs=self.test_image, output_gate=self.embed)
             self.train_embed = custom_apply_tf_op(inputs=self.train_image, output_gate=self.embed)
 

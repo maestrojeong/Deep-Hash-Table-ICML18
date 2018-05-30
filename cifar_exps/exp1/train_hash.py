@@ -12,7 +12,7 @@ from writer import create_muldir, write_pkl
 # ./
 from local_config import K_SET, RESULT_DIR,\
                          DATASET, GPU_ID, BATCH_SIZE, EPOCH, NSCLASS,\
-                         CONV_NAME, LOSS_TYPE, EMBED_M, BUCKET_D,\
+                         CONV_NAME, LOSS_TYPE, EMBED_M, BUCKET_D, ACTIVATE_K,\
                          HASH_LOSS_TYPE, HASH_DISTANCE_TYPE,\
                          PAIRWISE_LAMBDA, HASH_LAMBDA, HASH_MARGIN_ALPHA,\
                          HASH_DECAY_TYPE, HASH_DECAY_PARAM_TYPE
@@ -33,6 +33,7 @@ parser.add_argument("--conv", default = CONV_NAME, help="conv network", type = s
 parser.add_argument("--ltype", default = LOSS_TYPE, help="loss type", type = str)
 parser.add_argument("--m", default = EMBED_M, help="embedding m", type = int)
 parser.add_argument("--d", default = BUCKET_D, help="bucket d", type = int)
+parser.add_argument("--k", default = ACTIVATE_K, help="activate k", type = int)
 parser.add_argument("--hltype", default = HASH_LOSS_TYPE, help="hash loss type", type = str)
 parser.add_argument("--hdt", default = HASH_DISTANCE_TYPE, help="hash distance type", type = str)
 parser.add_argument("--plamb", default = PAIRWISE_LAMBDA, help="lambda for pairwise cost", type = float)
@@ -74,8 +75,7 @@ if __name__ == '__main__':
     model.prepare_test()
     model.build_hash()
     model.set_up_train_hash()
-    try: 
-        model.restore_hash(save_dir=HASH_SAVE_DIR)
+    try: model.restore_hash(save_dir=HASH_SAVE_DIR)
     except AttributeError:
         model.initialize()
         model.train_hash(args.epoch, save_dir=HASH_SAVE_DIR, board_dir=BOARD_DIR)

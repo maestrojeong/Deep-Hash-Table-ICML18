@@ -1,3 +1,8 @@
+import sys
+sys.path.append("../../configs")
+#../../configs
+from path import EXP_PATH
+
 import numpy as np
 
 DECAY_PARAMS_DICT =\
@@ -57,16 +62,13 @@ DECAY_PARAMS_DICT =\
                  },
         }
     }
-ACTIVATE_K_SET = np.arange(1, 5)
 K_SET = [1,4,16]
-#===========================Local configuration==============================#
-RESULT_DIR = '../../../exp_results/imagnet_exps/hash_metric2/'
-RESULT_DIR_READ = '../../../exp_results/imagnet_exps/hash_metric1/'
+RESULT_DIR = EXP_PATH+"imagenet_exps/"
 #========================PARAM============================#
 DATASET= 'imgnet32'
 GPU_ID = 0
-BATCH_SIZE = 256
-NSCLASS = 16
+BATCH_SIZE = 1024
+NSCLASS = 512
 EPOCH = 100
 # model
 EMBED_M= 64
@@ -77,11 +79,11 @@ BUCKET_D = 64
 ACTIVATE_K = 1
 # hash loss
 HASH_LOSS_TYPE = 'npair'
-HASH_DISTANCE_TYPE = 'hash1'
+HASH_DISTANCE_TYPE = 'h1'
 HASH_LAMBDA = 0.003
 HASH_MARGIN_ALPHA = 1.0
 # hash learning
 HASH_DECAY_TYPE = 'stair'
-HASH_DECAY_PARAM_TYPE = 'type1' 
+HASH_DECAY_PARAM_TYPE = 'a3' 
 # minimum cost flow
 PAIRWISE_LAMBDA = 0.01 
