@@ -5,8 +5,8 @@ sys.path.append('../../tfops')
 # utils 
 from evaluation import evaluate_hash_te
 from ortools_op import SolveMaxMatching
+from logger_op import LoggerManager
 from eval_op import get_nmi_suf_quick
-from remove import remove_logger
 from gpu_op import selectGpuById
 from np_op import activate_k_2D
 
@@ -15,7 +15,6 @@ from ops import rest_initializer, vars_info_vl, get_multi_train_op, get_initiali
 from nets import CONV_DICT
 from summary_op import SummaryWriter
 from transform_op import apply_tf_op, pairwise_distance_euclid_efficient
-from dist import pairwise_distance_euclid, pairwise_distance_euclid_v2
 from hash_dist import triplet_semihard_loss_hash, npairs_loss_hash,\
                       PAIRWISE_DISTANCE_WITH_OBJECTIVE_DICT, PAIRWISE_SIMILARITY_WITH_OBJECTIVE_DICT
 from lr_op import DECAY_DICT
@@ -37,8 +36,7 @@ class DeepMetric:
 
         selectGpuById(self.args.gpu)
         self.logfilepath = logfilepath
-        self.logger = logging.getLogger(__name__)
-        self.logger.addHandler(logging.FileHandler(self.logfilepath))
+        self.logger = LoggerManager(self.logfilepath, __name__)
 
         self.dataset_dict = dict()
         self.set_train_dataset(train_dataset) 
@@ -79,12 +77,10 @@ class DeepMetric:
         self.logger.info("Setting val_dataset ends")
     
     def switch_log_path(self, logfilepath):
-        remove_logger(self.logger)
-        del self.logger
+        self.logger.remove()
+        print("Log file switched from {} to {}".format(self.logfilepath, logfilepath))
         self.logfilepath = logfilepath
-        self.logger = logging.getLogger(__name__)
-        self.logger.addHandler(logging.FileHandler(self.logfilepath))
-        self.logger.info("Log file switched from {} to {}".format(self.logfilepath, logfilepath))
+        self.logger = LoggerManager(self.logfilepath, __name__)
 
     def build(self, pretrain=False):
         self.logger.info("Model building starts")
@@ -101,7 +97,6 @@ class DeepMetric:
         
         self.generate_sess()
 
-        PNM = PretrainNetworkManager(conv_name=self.args.conv, pretrain=pretrain, save_path='../classify/save/cifar_conv2/')
         self.conv_net = CONV_DICT[self.args.dataset][self.args.conv]
 
         if self.args.hltype == 'npair':
@@ -380,5 +375,5 @@ class DeepMetric:
 
     def delete(self):
         tf.reset_default_graph()
-        remove_logger(self.logger)
+        self.logger.remove()
         del self.logger

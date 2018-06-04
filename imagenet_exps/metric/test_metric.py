@@ -4,7 +4,7 @@ sys.path.append('../../utils')
 sys.path.append('../../tfops')
 
 # ../../configs
-from info import ACTIVATE_K_SET
+from info import ACTIVATE_K_SET_IMGNET
 
 # ../../utils
 from datasetmanager import DATASETMANAGER_DICT
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     model.restore(save_dir=SAVE_DIR)
     model.prepare_test()
 
-    for activate_k in ACTIVATE_K_SET:
+    for activate_k in ACTIVATE_K_SET_IMGNET:
         performance_th = model.test_th(activate_k, K_SET)
         performance_vq = model.test_vq(activate_k, K_SET)
 

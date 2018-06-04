@@ -41,12 +41,7 @@ DECAY_PARAMS_DICT =\
                 'a2' : {'boundaries' : [10000, 20000], 'values' : [3e-4, 1e-4, 3e-5]},
                 'a3' : {'boundaries' : [10000, 20000], 'values' : [1e-3, 3e-4, 1e-4]},
                 'a4' : {'boundaries' : [10000, 20000], 'values' : [3e-3, 1e-3, 3e-4]},
-                'a5' : {'boundaries' : [10000, 20000], 'values' : [1e-2, 3e-3, 1e-3]},
-                'b1' : {'boundaries' : [20000, 35000], 'values' : [1e-4, 3e-5, 1e-5]},
-                'b2' : {'boundaries' : [20000, 35000], 'values' : [3e-4, 1e-4, 3e-5]},
-                'b3' : {'boundaries' : [20000, 35000], 'values' : [1e-3, 3e-4, 1e-4]},
-                'b4' : {'boundaries' : [20000, 35000], 'values' : [3e-3, 1e-3, 3e-4]},
-                'b5' : {'boundaries' : [20000, 35000], 'values' : [1e-2, 3e-3, 1e-3]}
+                'a5' : {'boundaries' : [10000, 20000], 'values' : [1e-2, 3e-3, 1e-3]}
                  },
             512 : {
                 'a1' : {'boundaries' : [20000, 40000], 'values' : [1e-4, 3e-5, 1e-5]},
@@ -71,11 +66,11 @@ BATCH_SIZE = 1024
 NSCLASS = 512
 EPOCH = 100
 # model
-EMBED_M= 64
-CONV_NAME = 'conv2'
+EMBED_M=512 
+CONV_NAME = 'conv1'
 LOSS_TYPE = 'npair'
 # hash
-BUCKET_D = 64
+BUCKET_D = 512 # npair 512 triplet 256
 ACTIVATE_K = 1
 # hash loss
 HASH_LOSS_TYPE = 'npair'
@@ -83,7 +78,7 @@ HASH_DISTANCE_TYPE = 'h1'
 HASH_LAMBDA = 0.003
 HASH_MARGIN_ALPHA = 1.0
 # hash learning
-HASH_DECAY_TYPE = 'stair'
-HASH_DECAY_PARAM_TYPE = 'a3' 
+HASH_DECAY_TYPE = 'piecewise'
+HASH_DECAY_PARAM_TYPE = 'b2' 
 # minimum cost flow
-PAIRWISE_LAMBDA = 0.01 
+PAIRWISE_LAMBDA = 10.0 # npair 10.0 triplet 1.0
