@@ -71,6 +71,3 @@ python imagenet32_process.py
 * The code to solve the dicrete optimization problem in polynomial time is in **utils/ortools_op.py**
 * The time to solve the discrete optimization problem is calculated with the code **ortools_exp/**
 
-## License 
-MIT License
-
