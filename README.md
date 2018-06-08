@@ -72,4 +72,4 @@ python imagenet32_process.py
 * The time to solve the discrete optimization problem is calculated with the code **ortools_exp/**
 
 ## License
-MIT LIcense 
+MIT License 
