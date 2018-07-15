@@ -90,6 +90,8 @@ def get_recall_at_1_efficient(data, label, input1_tensor, input2_tensor, idx_ten
 
     if ndata%batch_size!=0:
         inputs = np.concatenate([data, np.zeros([batch_size-ndata%batch_size, nfeature])], axis=0) 
+    else :
+        inputs = data
     nbatch = len(inputs)//batch_size
 
     outputs = np.zeros([len(inputs), 2])
