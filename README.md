@@ -6,7 +6,7 @@ This repository has the source code for the paper "Efficient end-to-end learning
 @inproceedings{jeongICML18,
     title={Efficient end-to-end learning for quantizable representations},
     author={Jeong, Yeonwoo and Song, Hyun Oh},
-    booktitle={arXiv preprint arXiv:1805.05809},
+    booktitle={International Conference on Machine Learning (ICML)},
     year={2018}
     }
 ```
